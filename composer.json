@@ -1,0 +1,21 @@
+{
+  "name": "reventic/reventic-php",
+  "description": "Reventic PHP SDK",
+  "license": "MIT",
+  "keywords": ["reventic"],
+  "authors": [
+    {
+      "name": "Propellio",
+      "email": "info@propell.io"
+    }
+  ],
+  "require": {
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "require-dev": {},
+  "autoload": {
+    "psr-4": {
+      "Reventic\\ReventicSDK\\": "src"
+    }
+  }
+}
