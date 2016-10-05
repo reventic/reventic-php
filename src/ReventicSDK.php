@@ -2,7 +2,7 @@
 
 use GuzzleHttp\Client;
 
-class ReventicSDK
+class Tracker
 {
 
     private $apiKey = null;
@@ -61,7 +61,7 @@ class ReventicSDK
         var_dump($response);
     }
 
-    public function user($data = [])
+    public function updateUser($data = [])
     {
         if (!$this->apiKey) {
             throw new \Exception('No API Key!');
