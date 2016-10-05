@@ -43,40 +43,77 @@ class Tracker
         $this->apiKey = $apiKey;
     }
 
+    /**
+     * Track events
+     * @param $event
+     * @param array $data
+     * @return mixed
+     * @throws \Exception
+     */
     public function track($event, $data = [])
     {
-        if (!$this->apiKey) {
-            throw new \Exception('No API Key!');
-        }
-
-        $payload = [
-            'properties' => array_merge(['name' => $event], $data),
-            'apiKey' => $this->apiKey,
-            'userId' => $this->userId,
-            'sessionId' => $this->sessionId
-        ];
-
-        $response = $this->client->request('POST', 'event', ['json' => $payload]);
-
-        var_dump($response);
+        return $this->execute(array_merge(['name' => $event], $data));
     }
 
+    /**
+     * Update user data
+     * @param array $data
+     * @return mixed
+     * @throws \Exception
+     */
     public function updateUser($data = [])
+    {
+        return $this->execute($data, 'user');
+    }
+
+    /**
+     * Execute API request
+     * @param $data
+     * @param string $type
+     * @return mixed
+     * @throws \Exception
+     */
+    public function execute($data, $type = 'event')
     {
         if (!$this->apiKey) {
             throw new \Exception('No API Key!');
         }
 
-        $payload = [
+        $payload = $this->setPayload($data);
+
+        $response = $this->client->request('POST', $type, $payload);
+
+        $response = $this->parseResponse($response);
+
+        return $response;
+    }
+
+    /**
+     * Set payload data to be sent to API
+     * @param $data
+     * @return array
+     */
+    private function setPayload($data)
+    {
+        $payload = ['json' => [
             'properties' => $data,
-            'apiKey' => $this->apiKey,
-            'userId' => $this->userId,
-            'sessionId' => $this->sessionId
+            'apiKey' => $this->apiKey
+        ]
         ];
 
-        $response = $this->client->request('POST', 'user', ['json' => $payload]);
+        if ($this->userId) {
+            $payload['json']['userId'] = $this->userId;
+        }
 
-        var_dump($response);
+        if ($this->sessionId) {
+            $payload['json']['sessionId'] = $this->sessionId;
+        }
+
+        $payload['headers'] = [
+            'apiKey' => $this->apiKey
+        ];
+
+        return $payload;
     }
 
     /**
@@ -127,5 +164,25 @@ class Tracker
         $this->sessionId = $sessionId;
 
         return $this->sessionId;
+    }
+
+    /**
+     * Parse json encoded data returned from reventic API
+     * @param $response
+     * @return mixed
+     */
+    private function parseResponse($response)
+    {
+        $data = json_decode($response->getBody()->getContents());
+
+        if (isset($data->user->id)) {
+            $this->updateUserId($data->user->id);
+        }
+
+        if (isset($data->session->id)) {
+            $this->updateSessionId($data->session->id);
+        }
+
+        return $data;
     }
 }
