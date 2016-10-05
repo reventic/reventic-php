@@ -85,7 +85,7 @@ class ReventicSDK
      */
     private function setUserId()
     {
-        $this->userId = $_COOKIE[$this->userIdCookieName];
+        $this->userId = isset($_COOKIE[$this->userIdCookieName]) ? $_COOKIE[$this->userIdCookieName] : null;
 
         return $this->userId;
     }
@@ -110,7 +110,7 @@ class ReventicSDK
      */
     private function setSessionId()
     {
-        $this->sessionId = $_COOKIE[$this->sessionIdCookieName];
+        $this->sessionId = isset($_COOKIE[$this->sessionIdCookieName]) ? $_COOKIE[$this->sessionIdCookieName] : null;
 
         return $this->sessionId;
     }
