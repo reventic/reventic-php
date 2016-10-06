@@ -6,7 +6,10 @@ class Tracker
 {
 
     private $apiKey = null;
-    private $reventicUrl = 'https://demo.reventic.com/';
+
+    private $reventicUrl = 'https://api.reventic.com';
+    private $demoReventicUrl = 'https://demo.reventic.com/';
+
     private $userId;
     private $sessionId;
 
@@ -18,11 +21,16 @@ class Tracker
     /**
      * On init setup new http client and set user and session IDs
      * @param null $apiKey
+     * @param bool $demo
      */
-    public function __construct($apiKey = null)
+    public function __construct($apiKey = null, $demo = false)
     {
         if ($apiKey) {
             $this->apiKey = $apiKey;
+        }
+
+        if ($demo) {
+            $this->reventicUrl = $this->demoReventicUrl;
         }
 
         $this->client = new Client([
