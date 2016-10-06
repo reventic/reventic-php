@@ -12,6 +12,7 @@ class Tracker
 
     private $userId;
     private $sessionId;
+    private $userIp;
 
     private $userIdCookieName = 'reventic';
     private $sessionIdCookieName = 'rev-session';
@@ -40,6 +41,7 @@ class Tracker
 
         $this->setUserId();
         $this->setSessionId();
+        $this->setIpAddress();
     }
 
     /**
@@ -105,9 +107,9 @@ class Tracker
     {
         $payload = ['json' => [
             'properties' => $data,
-            'apiKey' => $this->apiKey
-        ]
-        ];
+            'apiKey' => $this->apiKey,
+            'revIp' => $this->userIp
+        ]];
 
         if ($this->userId) {
             $payload['json']['userId'] = $this->userId;
@@ -192,5 +194,45 @@ class Tracker
         }
 
         return $data;
+    }
+
+    /**
+     * Set user IP address
+     * @return bool
+     */
+    private function setIpAddress() {
+        $ip_keys = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'];
+
+        foreach ($ip_keys as $key) {
+            if (array_key_exists($key, $_SERVER) === true) {
+                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                    // trim for safety measures
+                    $ip = trim($ip);
+                    // attempt to validate IP
+                    if ($this->validateIp($ip)) {
+                        $this->userIp = $ip;
+                    }
+                }
+            }
+        }
+
+        $this->userIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
+
+        return $this->userIp;
+    }
+
+    /**
+     * Ensures an ip address is both a valid IP and does not fall within
+     * a private network range.
+     * @param $ip
+     * @return bool
+     */
+    private function validateIp($ip)
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return false;
+        }
+
+        return true;
     }
 }
