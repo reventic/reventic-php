@@ -1,5 +1,6 @@
 <?php namespace Reventic\ReventicSDK;
 
+use Exception;
 use GuzzleHttp\Client;
 
 class Tracker
@@ -91,11 +92,15 @@ class Tracker
 
         $payload = $this->setPayload($data);
 
-        $response = $this->client->request('POST', $type, $payload);
+        try {
+            $response = $this->client->request('POST', $type, $payload);
 
-        $response = $this->parseResponse($response);
+            $response = $this->parseResponse($response);
 
-        return $response;
+            return $response;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
     }
 
     /**
